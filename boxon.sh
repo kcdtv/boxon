@@ -70,7 +70,7 @@ $red▐█   Exit.$nocolour"
   elif [ "$(grep -c phy /tmp/interfaces)" == 1 ];
     then 
       interface=$( awk '{ print $2 }' /tmp/interfaces )
-      echo -e "$purpple▐█$white   Una suele interface WiFi est détectée et a été sectionnée: $orange$interface$nocolour"
+      echo -e "$purpple▐█$white   Une seule interface WiFi est détectée et a été sélectionnée: $orange$interface$nocolour"
        if [ -z "$(echo $interface | grep mon)" ];
           then   
             echo -e "$purpple▐█$white   Activation mode moniteur$nocolour"
@@ -78,7 +78,7 @@ $red▐█   Exit.$nocolour"
             interface=$( echo "$(echo $interface)mon")
         fi
   else
-      echo -e "$purpple▐█$white   Plusiseurs interfaces wifi disponibles. Choisissez.$nocolour"
+      echo -e "$purpple▐█$white   Plusieurs interfaces wifi disponibles. Choisissez.$nocolour"
       while [ -z "$interface" ]; 
         do
         echo -e "
