@@ -1,5 +1,5 @@
 #! /bin/bash
-version=1.0
+version=1.0.1
 
 # boxon.sh est un script bash qui détecte les réseaux WiFi vulnérables à un attaque WPS avec un PIN vide (valeur "null"). 
 # Pour plus d'info sur cette brèche de sécurité critique allez à http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
@@ -58,51 +58,56 @@ wash  &>> /tmp/versionwash
 grep "Wash v1.6." /tmp/versionwash || { echo -e "$red▐█   Erreur$nocolour - Vous devez actualiser wash. Installez $yellow Reaver v1.6.1$nocolour (ou version supèrieure) en allant à:$white https://github.com/t6x/reaver-wps-fork-t6x$nocolour 
 $red▐█   Exit.$nocolour"; exit 1; }
 rm /tmp/versionwash
-echo -e "$purpple▐█$white   Vérification distribution$nocolour"
-uname -r | grep kali || { echo -e "$red▐█   Erreur$nocolour - Désolé, la première version du script fonctionne uniquement avec$yellow Kali Linux.  
-$red▐█   Exit.$nocolour"; exit 1; }
-rm /tmp/versionwash
 airmon-ng | grep phy &>> /tmp/interfaces
   if [ ! -s /tmp/interfaces ];
     then
       echo -e "$red▐█   Erreur$nocolour -  Aucune interface wifi compatible mode moniteur n'est détectée.
 $red▐█   Exit.$nocolour"
-  elif [ "$(grep -c phy /tmp/interfaces)" == 1 ];
+  fi
+  if [ "$(grep -c phy /tmp/interfaces)" == 1 ];
     then 
-      interface=$( awk '{ print $2 }' /tmp/interfaces )
-      echo -e "$purpple▐█$white   Una suele interface WiFi est détectée et a été sectionnée: $orange$interface$nocolour"
-       if [ -z "$(echo $interface | grep mon)" ];
-          then   
-            echo -e "$purpple▐█$white   Activation mode moniteur$nocolour"
-            airmon-ng start $interface
-            interface=$( echo "$(echo $interface)mon")
-        fi
+      wlan=$( awk '{ print $2 }' /tmp/interfaces )
+      echo -e "$purpple▐█$white   Una seule interface WiFi est détectée et a été sectionnée: $orange$wlan$nocolour"
   else
       echo -e "$purpple▐█$white   Plusiseurs interfaces wifi disponibles. Choisissez.$nocolour"
-      while [ -z "$interface" ]; 
-        do
-        echo -e "
+        while [ -z "$wlan" ]; 
+          do
+            echo -e "
         Num      Interface	Driver		Chipset"
         nl < /tmp/interfaces
         echo ""
         echo -e "$purpple▐█$white   Interface:$orange"
         read -r -n 1 -ep "     " number
-        interface=$(awk '{ print $2 }' /tmp/interfaces | sed "$number!d" 2>/dev/null )   
-           if [ -z "$interface" ]; 
+        wlan=$(awk '{ print $2 }' /tmp/interfaces | sed "$number!d" 2>/dev/null )   
+           if [ -z "$wlan" ]; 
              then
                 echo -e "$red▐█   Error$nocolour -$white Numéro interface incorrect ($orange$number$white).$nocolour"
            else
-                echo -e "$purpple▐█$white   Interface $orange$interface$white selectionnée$nocolour"
-                  if [ -z "$(echo $interface | grep mon)" ];
-                    then   
-                      echo -e "$purpple▐█$white   Activation mode moniteur$nocolour"
-                      airmon-ng start $interface
-                      interface=$( echo "$(echo $interface)mon")
-                  fi 
+                echo -e "$purpple▐█$white   Interface $orange$wlan$white selectionnée$nocolour"
            fi 
-      done
+        done
+  fi  
+iw dev &>> /tmp/iwdev
+  if [ -n "$( grep -A 4  '\'"$wlan"'\b' /tmp/iwdev | grep monitor)" ];
+    then
+      iface="$wlan"
+  else
+      echo -e "$purpple▐█$white   Activation mode moniteur$nocolour" 
+      driver=$( grep '\'"$wlan"'\b' /tmp/interfaces | awk '{ print $3 }' )
+      if [[ "$driver" == "8812au" || "$driver" == "8814au" ]]; 
+        then
+          airmon-ng check kill
+          ip link set $wlan down
+          iwconfig $wlan mode monitor
+          ip link set $wlan up
+          iface="$wlan"
+        else
+          airmon-ng start $wlan
+          phy=$( grep $wlan /tmp/interfaces | awk '{ print $1 }' | cut -c 4 )
+          iface=$( iw dev | grep -A 1 "phy#$phy" | tail -n 1 | awk '{ print $2 }')
+      fi   
   fi
-wash -i $interface -j >> /tmp/scan &
+wash -i $iface -j >> /tmp/scan &
 washPID=$!
 trap 'break' SIGINT
   for (( i=0; ;i+=4 ))
@@ -116,22 +121,23 @@ echo -e "$purpple
                         ·▀▀▀▀  ▀█▄▀▪•▀▀ ▀▀ ▀█▄▀▪▀▀ █▪ 
 $nocolour
 Copyleft (C) 2017 kcdtv @ www.crack-wifi.com
-$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$whute sont vulnérables
-$orange▐█$purpple   Pressez <$purpple CTRL$white +$purpple C$white > pour arrêter le scanneur$nocolour
+$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$white sont vulnérables
+$orange▐█$purpple   Pressez$white <$purpple CTRL$white +$purpple C$white > pour arrêter le scanneur$nocolour
 
-        bssid          essid    Canal RSSI     " 
+        bssid      Canal RSSI    essid        modèle (si vulnérable)" 
 
         while read line
           do
             bssid=$( echo $line | awk -F '"' '{ print $4}')
-            essid=$( echo $( echo $line | awk -F '"' '{ print $8}')********  | cut -c -11 )
+            essid=$( echo $line | awk -F '"' '{ print $8}')
             channel=$(echo 0$( echo $line | awk -F '"' '{ print $11}' | awk '{ print $2}' | tr -d ',' )| rev | cut -c 1-2 | rev)
             rssi=$( echo $line | awk -F '"' '{ print $13}' | cut -c4-6 )
-              if [ -n "$(echo $line | grep 'NB4-SER-r2')" ] || [ -n "$(echo $line | grep 'NB4-FXC-r1')" ] || [ -n "$(echo $line | grep 'NB6V-FXC-r0')" ] || [ -n "$(echo $line | grep 'NB6V-SER-r0')" ] || [ -n "$(echo $line | grep 'SagemcomFast3965')" ] ;
+            vulnerable=$( echo $line | grep -o -E 'NB4-SER-r2|NB4-FXC-r1|NB6V-FXC-r0|NB6V-SER-r0|SagemcomFast3965|ZXHN H298N' | uniq )
+              if [ -n "$vulnerable" ];
                 then 
-                  echo -e " $orange $bssid  $essid$white  $channel  $rssi  $red réseau vulnérable$nocolour"
+                  echo -e " $orange $bssid  $white$channel  $rssi  $orange$essid   $vulnerable$nocolour"
                 else
-                  echo -e " $white $bssid  $essid  $channel  $rssi"
+                  echo -e " $white $bssid  $channel  $rssi  $essid$nocolour"
                fi  
            
         done < /tmp/scan
@@ -139,8 +145,7 @@ $orange▐█$purpple   Pressez <$purpple CTRL$white +$purpple C$white > pour ar
   done
 trap - SIGINT
 kill $washPID
-rm -r /tmp/interfaces /tmp/scan
+rm -r /tmp/interfaces /tmp/scan /tmp/iwdev
 echo -e "$nocolour
 Copyleft (C) 2017 kcdtv @ www.crack-wifi.com"
 exit 0
-  
