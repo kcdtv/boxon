@@ -67,9 +67,9 @@ $red▐█   Exit.$nocolour"
   if [ "$(grep -c phy /tmp/interfaces)" == 1 ];
     then 
       wlan=$( awk '{ print $2 }' /tmp/interfaces )
-      echo -e "$purpple▐█$white   Una seule interface WiFi est détectée et a été sectionnée: $orange$wlan$nocolour"
+      echo -e "$purpple▐█$white   Une seule interface WiFi est détectée et a été sectionnée: $orange$wlan$nocolour"
   else
-      echo -e "$purpple▐█$white   Plusiseurs interfaces wifi disponibles. Choisissez.$nocolour"
+      echo -e "$purpple▐█$white   Plusieurs interfaces wifi disponibles. Choisissez.$nocolour"
         while [ -z "$wlan" ]; 
           do
             echo -e "
