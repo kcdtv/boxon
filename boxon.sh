@@ -170,8 +170,8 @@ aband=$( iw phy $phy info | grep -o "5200 MHz" )
                           $white     //\/\enu    
                      
 
-$purpple             ▐█$yellow 1$white Scan Générique b/g/n (2,4Ghz)$nocolour  
-$purpple             ▐█$yellow 2$white Scan Générique a/ac (5Ghz)$nocolour
+$purpple             ▐█$yellow 1$white Scan Générique b/g/n (2,4GHz)$nocolour  
+$purpple             ▐█$yellow 2$white Scan Générique a/ac (5GHz)$nocolour
 $purpple             ▐█$yellow 3$white Garder un log des sessions effectuées
 $purpple             ▐█$red 4$white Sortir
 
