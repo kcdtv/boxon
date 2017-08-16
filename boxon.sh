@@ -59,7 +59,7 @@ $orange▐█$purpple   Pressez$white <$purpple CTRL$white +$purpple C$white > p
             essid=$( echo $line | awk -F '"' '{ print $8}')
             channel=$(echo 0$( echo $line | awk -F '"' '{ print $11}' | awk '{ print $2}' | tr -d ',' )| rev | cut -c 1-2 | rev)
             rssi=$( echo $line | awk -F '"' '{ print $13}' | cut -c4-6 )
-            vulnerable=$( echo $line | grep -o -E 'NB4-SER-r2|NB4-FXC-r1|NB4-FXC-r2|NB6V-FXC-r0|NB6V-FX-r1|NB6V-FX-r2|NB6V2-FXC-r0|NB6V-SER-r0|SagemcomFast3965|ZXHN H298N' | uniq )
+            vulnerable=$( echo $line | grep -o -E 'NB4-SER-r2|NB4-FXC-r1|NB4-FXC-r2|NB6V-FXC-r0|NB6V-FX-r1|NB6V-FX-r2|NB6V2-FXC-r0|NB6V-SER-r0|SagemcomFast3965|CBV38Z4EN|ZXHN H108N|ZXHN H298N' | uniq )
               if [ -n "$vulnerable" ];
                 then 
                   echo -e " $orange $bssid  $white$channel  $rssi  $orange$essid   $vulnerable$nocolour"
@@ -93,6 +93,7 @@ $nocolour                 modèles affectés par la faille WPS PIN NULL:
           $white   NB4-SER-r2$purpple NB4-FXC-r2$nocolour   réseaux:$white NEUF-XXXX
 $purpple    NB4-FXC-r1$white NB6V-SER-r0$purpple NB6V-FXC-r0$nocolour/$white-r1$nocolour/$purpple-r2)$nocolour  réseaux:$white SFR-XXXX
              $white SagemcomFast3965_LB2.8$nocolour  réseaux:$purpple Livebox-XXXX 
+             $purpple CBV38Z4EN$nocolour (Castlenet)   réseaux:$white  Numéricable 
 $nocolour
 Copyleft (C) 2017 kcdtv @ www.crack-wifi.com"
 echo -e "$purpple▐█$white   Vérification privilèges$nocolour"
@@ -203,7 +204,7 @@ $purpple             ▐█$white Choix:$orange"
           3 )
             while read line 
               do
-                 if [ -n "$( echo line | grep -E 'NB4-SER|NB4-FXC|NB6V-FXC|NB6V-SER|SagemcomFast3965|ZXHN H298N' )" ];
+                 if [ -n "$( echo line | grep -E 'NB4-SER|NB4-FXC|NB6V-FXC|NB6V-SER|SagemcomFast3965|ZXHN H108N|ZXHN H298N|ZXHN H218N|CBV38Z4EN' )" ];
                     then 
                       echo "$line" >> /tmp/translog
                   else
