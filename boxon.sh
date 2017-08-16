@@ -1,5 +1,5 @@
 #! /bin/bash
-version=1.0.1
+version=1.0.2
 
 # boxon.sh est un script bash qui détecte les réseaux WiFi vulnérables à un attaque WPS avec un PIN vide (valeur "null"). 
 # Pour plus d'info sur cette brèche de sécurité critique allez à http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
@@ -18,6 +18,62 @@ red="\033[1;31m"
 yellow="\033[1;33m"
 white="\033[1;37m"
 purpple="\033[0;35m"
+
+# Functions
+
+Screen()
+{
+echo -e "$purpple
+                         ▄▄▄▄·       ▐▄• ▄        ▐ ▄ 
+                        ▐█ ▀█▪▪      █▌█▌▪▪     •█▌▐█
+                        ▐█▀▀█▄ ▄█▀▄  ·██·  ▄█▀▄ ▐█▐▐▌
+                        ██▄▪▐█▐█▌.▐▌▪▐█·█▌▐█▌.▐▌██▐█▌
+                        ·▀▀▀▀  ▀█▄▀▪•▀▀ ▀▀ ▀█▄▀▪▀▀ █▪ 
+$nocolour
+Copyleft (C) 2017 kcdtv @ www.crack-wifi.com"
+}
+
+Goodbye()
+{
+rm /tmp/interfaces /tmp/iwdev /tmp/scan /tmp/translog /tmp/log 2>/dev/null
+Screen
+exit 0
+}
+
+## Regular scan (perfect if you want to check quickly and precisly if your PA is vulnerable)
+Regularscan()
+{
+wash -i $iface -j $ac >> /tmp/scan &
+washPID=$!
+  for (( i=0; ;i+=4 ))
+    do
+      clear
+      echo -e "$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$white sont vulnérables
+$orange▐█$purpple   Pressez$white <$purpple CTRL$white +$purpple C$white > pour arrêter le scanneur$nocolour
+
+        bssid      Canal RSSI    essid        modèle (si vulnérable)" 
+
+        while read line
+          do
+            bssid=$( echo $line | awk -F '"' '{ print $4}')
+            essid=$( echo $line | awk -F '"' '{ print $8}')
+            channel=$(echo 0$( echo $line | awk -F '"' '{ print $11}' | awk '{ print $2}' | tr -d ',' )| rev | cut -c 1-2 | rev)
+            rssi=$( echo $line | awk -F '"' '{ print $13}' | cut -c4-6 )
+            vulnerable=$( echo $line | grep -o -E 'NB4-SER-r2|NB4-FXC-r1|NB4-FXC-r2|NB6V-FXC-r0|NB6V-FX-r1|NB6V-FX-r2|NB6V2-FXC-r0|NB6V-SER-r0|SagemcomFast3965|ZXHN H298N' | uniq )
+              if [ -n "$vulnerable" ];
+                then 
+                  echo -e " $orange $bssid  $white$channel  $rssi  $orange$essid   $vulnerable$nocolour"
+                else
+                  echo -e " $white $bssid  $channel  $rssi  $essid$nocolour"
+               fi  
+        done < /tmp/scan
+      sleep 3
+  done
+kill $washPID 
+}
+
+########################### SCRIPT STARTS HERE ############################################## 
+
 echo -e "$purpple
                          ▄▄▄▄·       ▐▄• ▄        ▐ ▄ 
                         ▐█ ▀█▪▪      █▌█▌▪▪     •█▌▐█
@@ -34,11 +90,9 @@ echo -e "$purpple
  
 $nocolour                 modèles affectés par la faille WPS PIN NULL:
 
-                        $white   NB4-SER-r2$purpple  (NEUF-XXXX)
-                        $purpple  NB6V-SER-r0$white  (SFR-XXXX) 
-                        $white   NB4-FXC-r1$purple  (SFR-XXXX)
-                        $purpple  NB6V-FXC-r0$white  (SFR-XXXX)
-                    $white SagemcomFast3965$purpple  (Livebox-XXXX) 
+          $white   NB4-SER-r2$purpple NB4-FXC-r2$nocolour   réseaux:$white NEUF-XXXX
+$purpple    NB4-FXC-r1$white NB6V-SER-r0$purpple NB6V-FXC-r0$nocolour/$white-r1$nocolour/$purpple-r2)$nocolour  réseaux:$white SFR-XXXX
+             $white SagemcomFast3965_LB2.8$nocolour  réseaux:$purpple Livebox-XXXX 
 $nocolour
 Copyleft (C) 2017 kcdtv @ www.crack-wifi.com"
 echo -e "$purpple▐█$white   Vérification privilèges$nocolour"
@@ -48,7 +102,7 @@ echo -e "$purpple▐█$white   Vérification reaver$nocolour"
 which reaver || { echo -e "$red▐█   Erreur$nocolour -$yellow Reaver$nocolour n'est pas installé. Installez $yellow Reaver v1.6.1$nocolour (ou version supèrieure) en allant à:$white https://github.com/t6x/reaver-wps-fork-t6x$nocolour 
 $red▐█   Exit.$nocolour"; exit 1; } 
 reaver  &>> /tmp/versionreaver
-grep "Reaver v1.6." /tmp/versionreaver || { echo -e "$red▐█   Error$nocolour - Vous devez actualiser reaver. Installez $yellow Reaver v1.6.1$nocolour (ou version supèrieure) en allant à:$white https://github.com/t6x/reaver-wps-fork-t6x$nocolour 
+grep "Reaver v1.6." /tmp/versionreaver || { echo -e "$red▐█   Erreur$nocolour - Vous devez actualiser reaver. Installez $yellow Reaver v1.6.1$nocolour (ou version supèrieure) en allant à:$white https://github.com/t6x/reaver-wps-fork-t6x$nocolour 
 $red▐█   Exit.$nocolour"; exit 1; }
 rm /tmp/versionreaver
 echo -e "$purpple▐█$white   Vérification wash$nocolour"
@@ -67,7 +121,7 @@ $red▐█   Exit.$nocolour"
   if [ "$(grep -c phy /tmp/interfaces)" == 1 ];
     then 
       wlan=$( awk '{ print $2 }' /tmp/interfaces )
-      echo -e "$purpple▐█$white   Une seule interface WiFi est détectée et a été sectionnée: $orange$wlan$nocolour"
+      echo -e "$purpple▐█$white   Une seule interface WiFi est détectée et a été selectionnée: $orange$wlan$nocolour"
   else
       echo -e "$purpple▐█$white   Plusieurs interfaces wifi disponibles. Choisissez.$nocolour"
         while [ -z "$wlan" ]; 
@@ -81,7 +135,7 @@ $red▐█   Exit.$nocolour"
         wlan=$(awk '{ print $2 }' /tmp/interfaces | sed "$number!d" 2>/dev/null )   
            if [ -z "$wlan" ]; 
              then
-                echo -e "$red▐█   Error$nocolour -$white Numéro interface incorrect ($orange$number$white).$nocolour"
+                echo -e "$red▐█   Erreur$nocolour -$white Numéro interface incorrect ($orange$number$white).$nocolour"
            else
                 echo -e "$purpple▐█$white   Interface $orange$wlan$white selectionnée$nocolour"
            fi 
@@ -107,45 +161,67 @@ iw dev &>> /tmp/iwdev
           iface=$( iw dev | grep -A 1 "phy#$phy" | tail -n 1 | awk '{ print $2 }')
       fi   
   fi
-wash -i $iface -j >> /tmp/scan &
-washPID=$!
-trap 'break' SIGINT
-  for (( i=0; ;i+=4 ))
+phy=$( airmon-ng | grep '\'"$iface"'\b' | awk '{ print $1 }' )
+aband=$( iw phy $phy info | grep -o "5200 MHz" )
+  until [[ $choice == 4 ]]; 
     do
-      clear
-echo -e "$purpple
-                         ▄▄▄▄·       ▐▄• ▄        ▐ ▄ 
-                        ▐█ ▀█▪▪      █▌█▌▪▪     •█▌▐█
-                        ▐█▀▀█▄ ▄█▀▄  ·██·  ▄█▀▄ ▐█▐▐▌
-                        ██▄▪▐█▐█▌.▐▌▪▐█·█▌▐█▌.▐▌██▐█▌
-                        ·▀▀▀▀  ▀█▄▀▪•▀▀ ▀▀ ▀█▄▀▪▀▀ █▪ 
-$nocolour
-Copyleft (C) 2017 kcdtv @ www.crack-wifi.com
-$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$white sont vulnérables
-$orange▐█$purpple   Pressez$white <$purpple CTRL$white +$purpple C$white > pour arrêter le scanneur$nocolour
+      Screen
+      echo -e "           $white                     _ _             
+                          $white     //\/\enu    
+                     
 
-        bssid      Canal RSSI    essid        modèle (si vulnérable)" 
+$purpple             ▐█$yellow 1$white Scan Générique b/g/n (2,4Ghz)$nocolour  
+$purpple             ▐█$yellow 2$white Scan Générique a/ac (5Ghz)$nocolour
+$purpple             ▐█$yellow 3$white Garder un log des sessions effectuées
+$purpple             ▐█$red 4$white Sortir
 
-        while read line
-          do
-            bssid=$( echo $line | awk -F '"' '{ print $4}')
-            essid=$( echo $line | awk -F '"' '{ print $8}')
-            channel=$(echo 0$( echo $line | awk -F '"' '{ print $11}' | awk '{ print $2}' | tr -d ',' )| rev | cut -c 1-2 | rev)
-            rssi=$( echo $line | awk -F '"' '{ print $13}' | cut -c4-6 )
-            vulnerable=$( echo $line | grep -o -E 'NB4-SER-r2|NB4-FXC-r1|NB6V-FXC-r0|NB6V-SER-r0|SagemcomFast3965|ZXHN H298N' | uniq )
-              if [ -n "$vulnerable" ];
-                then 
-                  echo -e " $orange $bssid  $white$channel  $rssi  $orange$essid   $vulnerable$nocolour"
-                else
-                  echo -e " $white $bssid  $channel  $rssi  $essid$nocolour"
-               fi  
-           
-        done < /tmp/scan
-      sleep 3
-  done
-trap - SIGINT
-kill $washPID
-rm -r /tmp/interfaces /tmp/scan /tmp/iwdev
-echo -e "$nocolour
-Copyleft (C) 2017 kcdtv @ www.crack-wifi.com"
-exit 0
+$purpple             ▐█$white Choix:$orange"
+      read -r -n 1 -ep "                   " choice
+      echo -e "$nocolour"
+      unset -v ac
+        case $choice in
+          1 )
+          trap 'break' SIGINT
+          rm /tmp/scan
+          Regularscan
+          cat /tmp/scan >> /tmp/log
+          trap - SIGINT
+          ;;
+          2 ) 
+            if [[ -n "$aband" ]];
+              then
+                ac="-5" 
+                trap 'break' SIGINT
+                rm /tmp/scan
+                Regularscan
+                cat /tmp/scan >> /tmp/log
+                trap - SIGINT
+            else
+                echo -e "$red▐█   Erreur$nocolour -  L'interface choisie n'est pas compatible avec la bande 5Ghz."         
+            fi       
+          ;;
+          3 )
+            while read line 
+              do
+                 if [ -n "$( echo line | grep -E 'NB4-SER|NB4-FXC|NB6V-FXC|NB6V-SER|SagemcomFast3965|ZXHN H298N' )" ];
+                    then 
+                      echo "$line" >> /tmp/translog
+                  else
+                    mac=$( echo $line | awk -F '"' '{ print $4}')
+                    ssid=$( echo $line | awk -F '"' '{ print $8}')
+                    canal=$(echo 0$( echo $line | awk -F '"' '{ print $11}' | awk '{ print $2}' | tr -d ',' )| rev | cut -c 1-2 | rev)    
+                    echo "$mac  $canal  $ssid" >> /tmp/translog
+                  fi
+            done < /tmp/log
+          uniq /tmp/translog >> ~/boxon$( date |  awk '{print $3$2$6$4}' | tr -d ':' ).log
+          echo -e "$purpple▐█$white   Log sessions sauvegardé dans le fichier:$yellow /root/boxon$( date |  awk '{print $3$2$6$4}' | tr -d ':' ).log$nocolour" 
+          ;;
+          4 )
+          Goodbye
+          ;;
+          * )
+          echo -e "$red▐█   Erreur$nocolour: Option invalide" 
+          ;; 
+        esac   
+  done 
+exit 0 
