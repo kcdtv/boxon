@@ -5,7 +5,8 @@
 
 This script scans and detects the metworks that are vulnerable to the WPS scurity breach described here: https://github.com/t6x/reaver-wps-fork-t6x/wiki/Introducing-a-new-way-to-crack-WPS:-Option--p-with-an-Arbitrary-String  
 It is focused on the French situation and comes as a pedsagogical tool for this full disclosure: http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
-
+  
+  
 # **Dependencies**  
   
 Wash from `reaver 1.6.1` (or any superior version) and its dependencies. To install `reaver 1.6.1` (and other versions) visit: https://github.com/t6x/reaver-wps-fork-t6x  
@@ -21,7 +22,7 @@ git clone https://github.com/kcdtv/boxon.git
 ```
 cd boxon
 ```
-- Launch the script invoking bash with administrador privileges
+- Launch the script invoking bash with administrator privileges
 ```
 sudo bash boxon.sh
 ```
@@ -53,11 +54,9 @@ NB6V-SER-r0
 SagemcomFast3965_LB2.8
 
 
-
-
 # **Credits**
 
-Thanks and greetings to crack-wifi.com community
+Thanks and greetings to www.crack-wifi.com community
 
 
   
