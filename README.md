@@ -57,8 +57,7 @@ SagemcomFast3965_LB2.8
 
 # **Credits**
 
-Thanks and greetings to crack-wifi.com community, wifi-libre.com community and reaver community 
-
+Thanks and greetings to crack-wifi.com community
 
 
   
