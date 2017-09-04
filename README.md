@@ -4,7 +4,8 @@
 # **Description**  
 
 This script scans and detects the metworks that are vulnerable to the WPS scurity breach described here: https://github.com/t6x/reaver-wps-fork-t6x/wiki/Introducing-a-new-way-to-crack-WPS:-Option--p-with-an-Arbitrary-String  
-It is focused on the French situation and comes as a pedsagogical tool for this full disclosure: http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
+It is focused on the French situation and comes as a pedsagogical tool for this full disclosure: http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html  
+*Edit*: SFR customers are invited by their ISP to change (for free) their box for a last generation one that is not affected by this security breach.   
   
   
 # **Dependencies**  
