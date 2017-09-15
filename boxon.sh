@@ -1,5 +1,5 @@
 #! /bin/bash
-version=1.0.2
+version=1.1
 
 # boxon.sh est un script bash qui détecte les réseaux WiFi qui furent vulnérables à un attaque WPS avec un PIN vide (valeur "null"). 
 # Pour plus d'info sur cette brèche de sécurité critique allez à http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
