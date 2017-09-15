@@ -1,7 +1,7 @@
 #! /bin/bash
 version=1.0.2
 
-# boxon.sh est un script bash qui détecte les réseaux WiFi vulnérables à un attaque WPS avec un PIN vide (valeur "null"). 
+# boxon.sh est un script bash qui détecte les réseaux WiFi qui furent vulnérables à un attaque WPS avec un PIN vide (valeur "null"). 
 # Pour plus d'info sur cette brèche de sécurité critique allez à http://www.crack-wifi.com/forum/topic-12166-0day-crack-box-sfr-nb6v-en-deux-secondes-par-pin-null.html
 # This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 # This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -48,7 +48,7 @@ washPID=$!
   for (( i=0; ;i+=4 ))
     do
       clear
-      echo -e "$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$white sont vulnérables
+      echo -e "$orange▐█$purpple   Temps de scan: $orange$i$white secondes. Les réseaux en$orange orange$white purraient être vulnérables
 $orange▐█$purpple   Pressez$white <$purpple CTRL$white +$purpple C$white > pour arrêter le scanneur$nocolour
 
         bssid      Canal RSSI    essid        modèle (si vulnérable)" 
